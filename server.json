@@ -1,0 +1,34 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.temporevenue/proposals",
+  "title": "TempoRevenue",
+  "description": "Turn a client conversation into a priced proposal draft and track whether clients open or accept it.",
+  "version": "1.1.0",
+  "websiteUrl": "https://temporevenue.com",
+  "repository": {
+    "url": "https://github.com/temporevenue/mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@temporevenue/mcp",
+      "version": "1.0.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "TEMPOREVENUE_API_KEY",
+          "description": "API key from https://app.temporevenue.com/en/integrations. Without it the server runs in demo mode.",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://app.temporevenue.com/api/mcp"
+    }
+  ]
+}

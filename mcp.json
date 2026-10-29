@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "temporevenue": {
+      "command": "npx",
+      "args": ["-y", "@temporevenue/mcp"],
+      "env": {
+        "TEMPOREVENUE_API_KEY": "${TEMPOREVENUE_API_KEY}"
+      }
+    }
+  }
+}

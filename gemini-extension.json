@@ -1,0 +1,14 @@
+{
+  "name": "temporevenue",
+  "version": "1.0.0",
+  "description": "Turn a client conversation into a priced proposal draft from Gemini CLI.",
+  "mcpServers": {
+    "temporevenue": {
+      "command": "npx",
+      "args": ["-y", "@temporevenue/mcp"],
+      "env": {
+        "TEMPOREVENUE_API_KEY": "$TEMPOREVENUE_API_KEY"
+      }
+    }
+  }
+}
