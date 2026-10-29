@@ -6,15 +6,17 @@
   "version": "1.1.0",
   "websiteUrl": "https://temporevenue.com",
   "repository": {
-    "url": "https://github.com/temporevenue/mcp",
+    "url": "https://github.com/TempoRevenue/mcp",
     "source": "github"
   },
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@temporevenue/mcp",
-      "version": "1.0.0",
-      "transport": { "type": "stdio" },
+      "version": "1.1.0",
+      "transport": {
+        "type": "stdio"
+      },
       "environmentVariables": [
         {
           "name": "TEMPOREVENUE_API_KEY",

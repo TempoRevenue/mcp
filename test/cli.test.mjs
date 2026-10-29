@@ -74,3 +74,12 @@ test("CLI in demo mode speaks MCP over stdio", async () => {
   assert.equal(replies.length, 2);
   assert.equal(replies.find((r) => r.id === 2).result.tools.length, 4);
 });
+
+test("version script checks every manifest", async () => {
+  const { execFileSync } = await import("node:child_process");
+  const script = fileURLToPath(new URL("../scripts/version.mjs", import.meta.url));
+  const pkg = JSON.parse((await import("node:fs")).readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+  assert.throws(() => execFileSync(process.execPath, [script, "--check", "99.0.0"], { stdio: "pipe" }));
+  assert.throws(() => execFileSync(process.execPath, [script, "--check", "nope"], { stdio: "pipe" }));
+  execFileSync(process.execPath, [script, "--check", pkg.version], { stdio: "pipe" });
+});

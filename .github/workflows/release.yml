@@ -1,0 +1,86 @@
+name: Release
+
+# One tag releases everything:
+#   git tag v1.2.0 && git push origin v1.2.0
+# 1. tests and manifest versions must match the tag
+# 2. npm publish with provenance (npm trusted publishing, OIDC: no npm token stored)
+# 3. official MCP Registry publish (DNS-verified namespace com.temporevenue)
+# 4. GitHub release with generated notes
+# Everything that reads the official registry (Glama, PulseMCP, GitHub/VS Code) picks it up from there.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write # GitHub release
+  id-token: write # npm trusted publishing + provenance
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      MCP_PUBLISHER_VERSION: v1.8.1
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Version from tag
+        id: version
+        run: echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Check manifests match the tag
+        run: node scripts/version.mjs --check "${{ steps.version.outputs.value }}"
+
+      - name: Check the registry key is configured
+        env:
+          MCP_REGISTRY_PRIVATE_KEY: ${{ secrets.MCP_REGISTRY_PRIVATE_KEY }}
+        run: |
+          if [ -z "$MCP_REGISTRY_PRIVATE_KEY" ]; then
+            echo "::error::Secret MCP_REGISTRY_PRIVATE_KEY is missing (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+
+      - name: Test
+        run: |
+          npm test
+          node bin/cli.mjs --demo "Landing page with Stripe checkout" | grep -q "Fixed price"
+
+      - name: Publish to npm (trusted publishing)
+        run: npm publish --access public --provenance
+
+      - name: Wait until npm serves the new version
+        run: |
+          for i in $(seq 1 40); do
+            if npm view "@temporevenue/mcp@${{ steps.version.outputs.value }}" version >/dev/null 2>&1; then
+              echo "npm has ${{ steps.version.outputs.value }}"; exit 0
+            fi
+            sleep 15
+          done
+          echo "::error::npm did not serve the new version within 10 minutes"; exit 1
+
+      - name: Install mcp-publisher
+        run: |
+          curl -sSfL "https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz" \
+            | tar xz mcp-publisher
+          ./mcp-publisher --version
+
+      - name: Publish to the official MCP Registry
+        env:
+          MCP_REGISTRY_PRIVATE_KEY: ${{ secrets.MCP_REGISTRY_PRIVATE_KEY }}
+        run: |
+          ./mcp-publisher login dns --domain temporevenue.com --private-key "$MCP_REGISTRY_PRIVATE_KEY" > /dev/null
+          ./mcp-publisher publish
+
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes --verify-tag

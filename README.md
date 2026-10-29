@@ -97,6 +97,19 @@ MCP client ──stdio──▶ @temporevenue/mcp ──HTTPS (Bearer key)──
 npm test
 ```
 
+### Releasing
+
+One tag publishes to npm (with provenance) and to the official MCP Registry, then creates the GitHub release:
+
+```bash
+node scripts/version.mjs 1.2.0
+git commit -am "Release 1.2.0"
+git tag v1.2.0
+git push origin main v1.2.0
+```
+
+The workflow refuses to run if any manifest disagrees with the tag. The registry only accepts a version once, so always pick a new number.
+
 Requires Node.js 18.17 or later.
 
 ## Links

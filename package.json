@@ -1,6 +1,6 @@
 {
   "name": "@temporevenue/mcp",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "MCP server for TempoRevenue: turn a client conversation into a priced proposal draft from Claude, Cursor, Gemini CLI or any MCP client.",
   "mcpName": "com.temporevenue/proposals",
   "license": "MIT",
@@ -35,10 +35,10 @@
   "homepage": "https://temporevenue.com/developers/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/temporevenue/mcp.git"
+    "url": "git+https://github.com/TempoRevenue/mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/temporevenue/mcp/issues"
+    "url": "https://github.com/TempoRevenue/mcp/issues"
   },
   "author": "TempoRevenue <contact@temporevenue.com>"
 }
