@@ -1,0 +1,32 @@
+{
+  "name": "temporevenue",
+  "displayName": "TempoRevenue",
+  "version": "1.0.0",
+  "description": "Turn a client conversation into a priced proposal draft from Cursor. Price calculated in code from your rates and the estimated hours.",
+  "author": {
+    "name": "TempoRevenue",
+    "email": "contact@temporevenue.com"
+  },
+  "homepage": "https://temporevenue.com/developers/",
+  "repository": "https://github.com/temporevenue/mcp",
+  "license": "MIT",
+  "keywords": [
+    "proposal",
+    "sow",
+    "estimate",
+    "freelance"
+  ],
+  "mcpServers": {
+    "temporevenue": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@temporevenue/mcp"
+      ],
+      "env": {
+        "TEMPOREVENUE_API_KEY": "${TEMPOREVENUE_API_KEY}"
+      }
+    }
+  },
+  "logo": "https://app.temporevenue.com/connector/temporevenue-connector-512.png"
+}

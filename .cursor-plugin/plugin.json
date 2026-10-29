@@ -16,6 +16,17 @@
     "estimate",
     "freelance"
   ],
-  "mcpServers": "./.mcp.json",
+  "mcpServers": {
+    "temporevenue": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@temporevenue/mcp"
+      ],
+      "env": {
+        "TEMPOREVENUE_API_KEY": "${TEMPOREVENUE_API_KEY}"
+      }
+    }
+  },
   "logo": "https://app.temporevenue.com/connector/temporevenue-connector-512.png"
 }
