@@ -1,6 +1,6 @@
 {
   "name": "temporevenue",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Turn a client conversation into a priced proposal draft from Claude Code. Price calculated in code from your rate and the estimated hours.",
   "author": {
     "name": "TempoRevenue",
@@ -10,5 +10,11 @@
   "homepage": "https://temporevenue.com/developers/",
   "repository": "https://github.com/TempoRevenue/mcp",
   "license": "MIT",
-  "keywords": ["proposal", "sow", "estimate", "freelance", "mcp"]
+  "keywords": [
+    "proposal",
+    "sow",
+    "estimate",
+    "freelance",
+    "mcp"
+  ]
 }

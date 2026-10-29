@@ -12,7 +12,7 @@
       "name": "temporevenue",
       "source": "./",
       "description": "Turn a client conversation into a priced proposal draft from Claude Code.",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "category": "productivity",
       "homepage": "https://temporevenue.com/developers/",
       "license": "MIT"
