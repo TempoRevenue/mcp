@@ -1,0 +1,24 @@
+---
+description: Turn a client request into a scoped, priced proposal draft with the TempoRevenue MCP server
+globs:
+alwaysApply: false
+---
+
+# Client scoping
+
+When the user pastes a client message, call notes or a project brief and asks to quote, price, estimate or write a proposal or statement of work:
+
+1. Write a short brief, not the full chat:
+   - client name, if known
+   - deliverables as a list
+   - timeline or deadline
+   - budget, only if the client or the user stated one
+   - anything explicitly out of scope
+2. Show the brief and ask for confirmation. Creating a proposal uses one from the user's TempoRevenue allowance.
+3. Call the `create_proposal` tool of the `temporevenue` MCP server with `deal_description` set to the brief and `client_name` if known.
+4. Return the editor link. Nothing is sent to the client until the user sends it.
+
+Never invent a price: without one, TempoRevenue calculates it from the user's rate and the estimated hours.
+To follow up later, use `list_proposals` (status `viewed` shows opened, unaccepted proposals) and `get_proposal_status`.
+
+Setup: https://github.com/TempoRevenue/mcp#install

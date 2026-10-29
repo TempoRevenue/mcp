@@ -83,3 +83,22 @@ test("version script checks every manifest", async () => {
   assert.throws(() => execFileSync(process.execPath, [script, "--check", "nope"], { stdio: "pipe" }));
   execFileSync(process.execPath, [script, "--check", pkg.version], { stdio: "pipe" });
 });
+
+test("prompts are served locally and advertised in initialize", async () => {
+  const child = spawn(process.execPath, [CLI, "--demo"], { env: { ...process.env, TEMPOREVENUE_API_KEY: "" } });
+  let out = "";
+  child.stdout.on("data", (chunk) => (out += chunk));
+  const send = (m) => child.stdin.write(`${JSON.stringify(m)}\n`);
+  send({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "t", version: "1" } } });
+  send({ jsonrpc: "2.0", id: 2, method: "prompts/list" });
+  send({ jsonrpc: "2.0", id: 3, method: "prompts/get", params: { name: "quote-client-message", arguments: { message: "Need a Shopify store", client_name: "Ana" } } });
+  send({ jsonrpc: "2.0", id: 4, method: "prompts/get", params: { name: "nope" } });
+  child.stdin.end();
+  await new Promise((resolve) => child.on("close", resolve));
+  const replies = Object.fromEntries(out.trim().split("\n").map((l) => JSON.parse(l)).map((r) => [r.id, r]));
+  assert.ok(replies[1].result.capabilities.prompts);
+  assert.deepEqual(replies[2].result.prompts.map((p) => p.name), ["quote-client-message", "check-pending-proposals"]);
+  assert.match(replies[3].result.messages[0].content.text, /Need a Shopify store/);
+  assert.match(replies[3].result.messages[0].content.text, /Client: Ana/);
+  assert.equal(replies[4].error.code, -32602);
+});

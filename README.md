@@ -95,6 +95,18 @@ claude mcp add --transport http temporevenue https://app.temporevenue.com/api/mc
 
 On claude.ai and ChatGPT, add TempoRevenue as a connector and sign in with OAuth instead of an API key.
 
+## Prompts
+
+Besides the tools, the package serves two MCP prompts (in demo and live mode):
+
+- `quote-client-message`: turns a client message into a brief and creates the draft after you confirm.
+- `check-pending-proposals`: lists proposals the client opened but has not accepted, so you know who to follow up.
+
+## Templates and rules
+
+- [templates/](templates/): five free statement of work templates (web app MVP, website redesign, API integration, e-commerce build, monthly retainer).
+- [.cursor/rules/client-scoping.mdc](.cursor/rules/client-scoping.mdc): a Cursor rule that turns a pasted client request into a brief and calls `create_proposal`.
+
 ## How it works
 
 ```
