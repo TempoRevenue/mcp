@@ -7,7 +7,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
-const FILES = ["package.json", "server.json", "gemini-extension.json", ".plugin/plugin.json", ".cursor-plugin/plugin.json"];
+const FILES = ["package.json", "server.json", "gemini-extension.json", ".plugin/plugin.json", ".cursor-plugin/plugin.json", ".claude-plugin/plugin.json"];
 
 const read = (file) => JSON.parse(readFileSync(root + file, "utf8"));
 const write = (file, data) => writeFileSync(root + file, `${JSON.stringify(data, null, 2)}\n`);
@@ -17,6 +17,7 @@ function versions() {
   const out = FILES.map((file) => [file, read(file).version]);
   const server = read("server.json");
   for (const pkg of server.packages ?? []) out.push([`server.json packages[${pkg.identifier}]`, pkg.version]);
+  for (const plugin of read(".claude-plugin/marketplace.json").plugins ?? []) out.push([`marketplace.json plugins[${plugin.name}]`, plugin.version]);
   return out;
 }
 
@@ -44,5 +45,8 @@ if (check) {
     if (file === "server.json") for (const pkg of data.packages ?? []) pkg.version = target;
     write(file, data);
   }
-  console.log(`Set ${target} in ${FILES.join(", ")}`);
+  const marketplace = read(".claude-plugin/marketplace.json");
+  for (const plugin of marketplace.plugins ?? []) plugin.version = target;
+  write(".claude-plugin/marketplace.json", marketplace);
+  console.log(`Set ${target} in ${FILES.join(", ")}, .claude-plugin/marketplace.json`);
 }

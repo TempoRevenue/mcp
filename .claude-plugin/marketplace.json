@@ -1,0 +1,21 @@
+{
+  "name": "temporevenue",
+  "owner": {
+    "name": "TempoRevenue",
+    "email": "contact@temporevenue.com"
+  },
+  "metadata": {
+    "description": "TempoRevenue for Claude Code: quote clients from the conversation."
+  },
+  "plugins": [
+    {
+      "name": "temporevenue",
+      "source": "./",
+      "description": "Turn a client conversation into a priced proposal draft from Claude Code.",
+      "version": "1.1.1",
+      "category": "productivity",
+      "homepage": "https://temporevenue.com/developers/",
+      "license": "MIT"
+    }
+  ]
+}

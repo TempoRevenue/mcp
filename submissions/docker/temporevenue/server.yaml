@@ -1,0 +1,22 @@
+name: temporevenue
+type: remote
+dynamic:
+  tools: true
+meta:
+  category: productivity
+  tags:
+    - productivity
+    - proposals
+    - freelance
+    - remote
+about:
+  title: TempoRevenue
+  description: Turn a client conversation into a priced proposal draft and track whether the client opened or accepted it
+  icon: https://app.temporevenue.com/connector/temporevenue-connector-512.png
+remote:
+  transport_type: streamable-http
+  url: https://app.temporevenue.com/api/mcp
+oauth:
+  - provider: temporevenue
+    secret: temporevenue.personal_access_token
+    env: TEMPOREVENUE_PERSONAL_ACCESS_TOKEN

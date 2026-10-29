@@ -41,6 +41,28 @@ Nothing is sent to a client until you send it yourself.
 claude mcp add temporevenue -e TEMPOREVENUE_API_KEY=your_api_key -- npx -y @temporevenue/mcp
 ```
 
+### Claude Code plugin
+
+Adds the server plus a `/quote` command and a skill that turns the conversation into a proposal brief:
+
+```bash
+claude plugin marketplace add TempoRevenue/mcp
+claude plugin install temporevenue@temporevenue
+```
+
+Set `TEMPOREVENUE_API_KEY` in your environment first; without it the plugin runs in demo mode.
+
+### VS Code
+
+One click. VS Code asks for your API key in a password field (leave it empty to try demo mode):
+
+- [Install in VS Code](https://insiders.vscode.dev/redirect/mcp/install?name=temporevenue&inputs=%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22temporevenue_api_key%22%2C%22description%22%3A%22TempoRevenue+API+key+%28leave+empty+to+try+demo+mode%29%22%2C%22password%22%3Atrue%7D%5D&config=%7B%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40temporevenue%2Fmcp%22%5D%2C%22env%22%3A%7B%22TEMPOREVENUE_API_KEY%22%3A%22%24%7Binput%3Atemporevenue_api_key%7D%22%7D%7D)
+- [Install in VS Code Insiders](https://insiders.vscode.dev/redirect/mcp/install?name=temporevenue&inputs=%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22temporevenue_api_key%22%2C%22description%22%3A%22TempoRevenue+API+key+%28leave+empty+to+try+demo+mode%29%22%2C%22password%22%3Atrue%7D%5D&config=%7B%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40temporevenue%2Fmcp%22%5D%2C%22env%22%3A%7B%22TEMPOREVENUE_API_KEY%22%3A%22%24%7Binput%3Atemporevenue_api_key%7D%22%7D%7D&quality=insiders)
+
+### Cline
+
+Ask Cline to install the server from this repository. It follows [llms-install.md](llms-install.md).
+
 ### Cursor, Claude Desktop, Windsurf
 
 Add to `.cursor/mcp.json`, `claude_desktop_config.json` or your client's MCP config:

@@ -42,7 +42,9 @@ if (flag("--version") || flag("-v")) {
   process.exit(0);
 }
 
-const apiKey = process.env.TEMPOREVENUE_API_KEY?.trim();
+// A client that does not expand variables passes "${TEMPOREVENUE_API_KEY}" literally: treat it as unset (demo mode).
+const rawKey = process.env.TEMPOREVENUE_API_KEY?.trim();
+const apiKey = rawKey && !rawKey.startsWith("${") ? rawKey : undefined;
 const demo = flag("--demo") || !apiKey;
 
 // A person typing in a terminal (not an MCP client) gets a readable estimate.
