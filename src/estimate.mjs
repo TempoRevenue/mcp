@@ -1,7 +1,7 @@
-// Deterministic scope estimator used by `--demo` and the TempoRevenue web
-// generator (en, pt, es, de). No AI and no network: keyword rules pick the
-// deliverables and base hours; all arithmetic (hours, risk buffer, total)
-// happens here in integer cents. Same input, same output, every time.
+// Deterministic scope estimator used by `--demo`, `calculate_sow_pricing` and the
+// TempoRevenue web generator (en, pt, es, de). No AI and no network: keyword
+// rules pick the deliverables and base hours; all arithmetic (hours, risk
+// buffer, total) happens here in integer cents. Same input, same output.
 // Identical copy lives in the TempoRevenue site (chat-to-SOW generator).
 
 export const LOCALES = ["en", "pt", "es", "de"];
@@ -201,6 +201,41 @@ export function estimateScope({ text, rate = DEFAULT_RATE, buffer = 0.2, locale 
   };
 }
 
+/** Limits for the /sow?items=... link (it comes from outside: AI assistants and other people). */
+export const MAX_LINK_ITEMS = 30;
+export const MAX_ITEM_HOURS = 500;
+
+/**
+ * Reads "Deliverable:hours;Deliverable:hours" (the /sow?items=... format). Skips
+ * anything invalid; names up to 80 characters without control characters, hours 0 to 500.
+ */
+export function parseItems(raw) {
+  return String(raw ?? "")
+    .split(";")
+    .map((part) => {
+      const at = part.lastIndexOf(":");
+      if (at < 1) return null;
+      // eslint-disable-next-line no-control-regex
+      const label = part.slice(0, at).replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, 80);
+      const hours = tenths(Number(part.slice(at + 1).trim().replace(",", ".")));
+      return label && Number.isFinite(hours) && hours > 0 && hours <= MAX_ITEM_HOURS ? { label, hours } : null;
+    })
+    .filter(Boolean)
+    .slice(0, MAX_LINK_ITEMS);
+}
+
+/** Same math as estimateScope, with the deliverables and hours already given (/sow?items=...). */
+export function estimateFromItems({ items, rate = DEFAULT_RATE, buffer = 0.2 }) {
+  const safeRate = Number.isFinite(rate) && rate > 0 ? Math.min(Math.round(rate), 2000) : DEFAULT_RATE;
+  const safeBuffer = BUFFER_OPTIONS.includes(buffer) ? buffer : 0.2;
+  const list = items.map((item, index) => ({ id: `item-${index}`, label: item.label, hours: tenths(item.hours) }));
+  const subtotalHours = tenths(list.reduce((sum, item) => sum + item.hours, 0));
+  const bufferHours = tenths(subtotalHours * safeBuffer);
+  const totalHours = tenths(subtotalHours + bufferHours);
+  const totalCents = Math.round(totalHours * 10) * safeRate * 10;
+  return { items: list, signals: [], rate: safeRate, buffer: safeBuffer, subtotalHours, bufferHours, totalHours, totalCents, total: totalCents / 100 };
+}
+
 /** Money without cents in the language's format, with a plain space (the app does not read non-breaking spaces). */
 export function formatMoney(value, locale = "en") {
   const { intl, currency } = LOCALE_SETTINGS[localeOf(locale)];
@@ -214,19 +249,22 @@ export function formatHours(value, locale = "en") {
 }
 
 const BRIEF = {
-  en: { client: "Client", message: "Client message", scope: "Scope and hours", buffer: "Scope risk buffer", price: (t, h, r) => `Fixed price: ${t} (${h} at ${r}/h).` },
-  pt: { client: "Cliente", message: "Mensagem do cliente", scope: "Escopo e horas", buffer: "Margem de risco do escopo", price: (t, h, r) => `Preço fixo: ${t} (${h} a ${r}/h).` },
-  es: { client: "Cliente", message: "Mensaje del cliente", scope: "Alcance y horas", buffer: "Margen de riesgo del alcance", price: (t, h, r) => `Precio fijo: ${t} (${h} a ${r}/h).` },
-  de: { client: "Kunde", message: "Nachricht des Kunden", scope: "Umfang und Stunden", buffer: "Risikopuffer für den Umfang", price: (t, h, r) => `Festpreis: ${t} (${h} zu ${r}/h).` },
+  en: { client: "Client", project: "Project", message: "Client message", scope: "Scope and hours", buffer: "Scope risk buffer", price: (t, h, r) => `Fixed price: ${t} (${h} at ${r}/h).` },
+  pt: { client: "Cliente", project: "Projeto", message: "Mensagem do cliente", scope: "Escopo e horas", buffer: "Margem de risco do escopo", price: (t, h, r) => `Preço fixo: ${t} (${h} a ${r}/h).` },
+  es: { client: "Cliente", project: "Proyecto", message: "Mensaje del cliente", scope: "Alcance y horas", buffer: "Margen de riesgo del alcance", price: (t, h, r) => `Precio fijo: ${t} (${h} a ${r}/h).` },
+  de: { client: "Kunde", project: "Projekt", message: "Nachricht des Kunden", scope: "Umfang und Stunden", buffer: "Risikopuffer für den Umfang", price: (t, h, r) => `Festpreis: ${t} (${h} zu ${r}/h).` },
 };
 
 /** Brief text for the TempoRevenue composer (and the terminal in --demo). */
-export function formatBrief({ clientName, text }, estimate, locale = "en") {
+export function formatBrief({ clientName, title, text }, estimate, locale = "en") {
   const lang = localeOf(locale);
   const t = BRIEF[lang];
   const lines = [];
-  if (clientName) lines.push(`${t.client}: ${clientName}`, "");
-  lines.push(`${t.message}:`, String(text ?? "").trim(), "");
+  if (clientName) lines.push(`${t.client}: ${clientName}`);
+  if (title) lines.push(`${t.project}: ${title}`);
+  if (clientName || title) lines.push("");
+  const message = String(text ?? "").trim();
+  if (message) lines.push(`${t.message}:`, message, "");
   lines.push(`${t.scope}:`);
   for (const item of estimate.items) lines.push(`- ${item.label}: ${formatHours(item.hours, lang)}`);
   lines.push(`- ${t.buffer} (${Math.round(estimate.buffer * 100)}%): ${formatHours(estimate.bufferHours, lang)}`);
