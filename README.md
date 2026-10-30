@@ -22,6 +22,7 @@ Demo mode runs locally. It exposes the same four tools as the live server and an
 
 | Tool | What it does |
 | --- | --- |
+| `calculate_sow_pricing` | Itemized estimate from a client message: deliverables, hours, a 15/20/25% buffer and a fixed price, plus a link that opens it in the web calculator. Runs locally in this package, read-only, no account needed. |
 | `create_proposal` | Creates a draft proposal from a short description of the client's request. A price stated in the request is used as the total; otherwise it is your rate times the estimated hours, calculated in code. Returns a link to review and send. |
 | `get_proposal_status` | Draft, viewed or accepted, with the dates the client opened and accepted it. |
 | `list_proposals` | Your most recent proposals, optionally filtered by status. |
@@ -95,15 +96,19 @@ claude mcp add --transport http temporevenue https://app.temporevenue.com/api/mc
 
 On claude.ai and ChatGPT, add TempoRevenue as a connector and sign in with OAuth instead of an API key.
 
-## Prompts
+## Prompts and resources
 
-Besides the tools, the package serves two MCP prompts (in demo and live mode):
+Besides the tools, the package serves MCP prompts and resources locally (in demo and live mode, no account):
 
 - `quote-client-message`: turns a client message into a brief and creates the draft after you confirm.
 - `check-pending-proposals`: lists proposals the client opened but has not accepted, so you know who to follow up.
+- `scope-repo-to-proposal`: reads the current project, lists the remaining deliverables, prices them with `calculate_sow_pricing` and drafts the proposal after you confirm.
+- Resource `temporevenue://reference/estimator-defaults` (JSON): base hours per deliverable and the pricing formula.
+- Resource `temporevenue://templates/sow-clauses` (Markdown): scope, change request, revision, payment and ownership clauses.
 
 ## Templates and rules
 
+- [benchmarks/](benchmarks/): hours by deliverable as CSV and Markdown (TempoRevenue defaults, not market averages), each row linked to the calculator.
 - [templates/](templates/): five free statement of work templates (web app MVP, website redesign, API integration, e-commerce build, monthly retainer).
 - [.cursor/rules/client-scoping.mdc](.cursor/rules/client-scoping.mdc): a Cursor rule that turns a pasted client request into a brief and calls `create_proposal`.
 

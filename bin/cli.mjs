@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { API_KEY_URL, SIGNUP_URL, WEB_DEMO_URL, handleDemoMessage } from "../src/demo.mjs";
 import { DEFAULT_ENDPOINT, createProxy } from "../src/proxy.mjs";
 import { SCENARIOS, estimateScope, formatBrief } from "../src/estimate.mjs";
-import { handlePromptMessage, withPromptsCapability } from "../src/prompts.mjs";
+import { decorateUpstream, handleLocalMessage } from "../src/local.mjs";
 
 const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const args = process.argv.slice(2);
@@ -77,12 +77,13 @@ const upstream = demo
     }
   : createProxy({ apiKey, endpoint: process.env.TEMPOREVENUE_MCP_URL || DEFAULT_ENDPOINT, userAgent: `temporevenue-mcp/${pkg.version}` });
 
-// Prompts are answered here in both modes; everything else goes upstream.
+// Prompts, resources and calculate_sow_pricing are answered here in both modes
+// (no account, no network); everything else goes upstream.
 const forward = async (message) => {
-  const prompt = handlePromptMessage(message);
-  if (prompt !== undefined) return message.id === undefined || message.id === null ? [] : [prompt];
+  const local = handleLocalMessage(message);
+  if (local !== undefined) return message.id === undefined || message.id === null ? [] : [local];
   const responses = await upstream(message);
-  return message?.method === "initialize" ? responses.map(withPromptsCapability) : responses;
+  return responses.map((response) => decorateUpstream(message, response));
 };
 
 const write = (message) => process.stdout.write(`${JSON.stringify(message)}\n`);

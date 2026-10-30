@@ -72,7 +72,7 @@ test("CLI in demo mode speaks MCP over stdio", async () => {
   await new Promise((resolve) => child.on("close", resolve));
   const replies = out.trim().split("\n").map((line) => JSON.parse(line));
   assert.equal(replies.length, 2);
-  assert.equal(replies.find((r) => r.id === 2).result.tools.length, 4);
+  assert.deepEqual(replies.find((r) => r.id === 2).result.tools.map((t) => t.name), ["calculate_sow_pricing", "create_proposal", "get_proposal_status", "list_proposals", "get_credit_balance"]);
 });
 
 test("version script checks every manifest", async () => {
@@ -97,8 +97,33 @@ test("prompts are served locally and advertised in initialize", async () => {
   await new Promise((resolve) => child.on("close", resolve));
   const replies = Object.fromEntries(out.trim().split("\n").map((l) => JSON.parse(l)).map((r) => [r.id, r]));
   assert.ok(replies[1].result.capabilities.prompts);
-  assert.deepEqual(replies[2].result.prompts.map((p) => p.name), ["quote-client-message", "check-pending-proposals"]);
+  assert.deepEqual(replies[2].result.prompts.map((p) => p.name), ["quote-client-message", "scope-repo-to-proposal", "check-pending-proposals"]);
   assert.match(replies[3].result.messages[0].content.text, /Need a Shopify store/);
   assert.match(replies[3].result.messages[0].content.text, /Client: Ana/);
   assert.equal(replies[4].error.code, -32602);
+});
+
+test("calculate_sow_pricing, resources and live-mode merging", async () => {
+  const { handleLocalMessage, decorateUpstream, CALCULATE_TOOL } = await import("../src/local.mjs");
+  const r = handleLocalMessage({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "calculate_sow_pricing", arguments: { client_message: "Shopify store with Stripe checkout", hourly_rate: 120, buffer_percent: 15, client_name: "Ana" } } });
+  const out = r.result.structuredContent;
+  assert.equal(out.currency, "USD");
+  assert.equal(out.buffer_percent, 15);
+  const sum = Math.round(out.line_items.reduce((a, i) => a + i.price * 100, 0) + Math.round(out.buffer_hours * 10) * 120 * 10);
+  assert.equal(sum, Math.round(out.total_price * 100));
+  const url = new URL(out.preview_url);
+  assert.equal(url.origin + url.pathname, "https://temporevenue.com/sow");
+  assert.equal(url.searchParams.get("client"), "Ana");
+  assert.equal(url.searchParams.get("utm_source"), "mcp");
+  assert.match(url.searchParams.get("items"), /^Discovery and scoping:\d/);
+  assert.ok(handleLocalMessage({ jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "calculate_sow_pricing", arguments: {} } }).result.isError);
+  assert.equal(handleLocalMessage({ jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "create_proposal", arguments: {} } }), undefined);
+  const list = handleLocalMessage({ jsonrpc: "2.0", id: 4, method: "resources/list" });
+  assert.equal(list.result.resources.length, 2);
+  for (const res of list.result.resources) assert.ok(handleLocalMessage({ jsonrpc: "2.0", id: 5, method: "resources/read", params: { uri: res.uri } }).result.contents[0].text.length > 100);
+  assert.equal(handleLocalMessage({ jsonrpc: "2.0", id: 6, method: "resources/read", params: { uri: "temporevenue://nope" } }).error.code, -32002);
+  const merged = decorateUpstream({ method: "tools/list" }, { jsonrpc: "2.0", id: 7, result: { tools: [{ name: "create_proposal" }] } });
+  assert.deepEqual(merged.result.tools.map((t) => t.name), [CALCULATE_TOOL.name, "create_proposal"]);
+  const init = decorateUpstream({ method: "initialize" }, { jsonrpc: "2.0", id: 8, result: { capabilities: { tools: {} } } });
+  assert.ok(init.result.capabilities.resources && init.result.capabilities.prompts);
 });
