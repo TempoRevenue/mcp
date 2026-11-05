@@ -39,7 +39,7 @@ function quoteText({ message = "", client_name: clientName = "" }) {
     message.trim() || "(ask me for the client's message)",
     "",
     "1. Write a short brief, not the full chat: deliverables as a list, timeline, budget only if one was stated, anything out of scope.",
-    "2. Show me the brief and wait for my confirmation: creating a proposal uses one from my allowance.",
+    "2. Show me the brief and wait for my confirmation: creating the draft counts toward my TempoRevenue draft limit.",
     "3. Call create_proposal with deal_description set to the brief and client_name if known. Never invent a price.",
     "4. Give me the editor link. Nothing is sent to the client until I send it.",
   ].join("\n");
@@ -62,7 +62,7 @@ function scopeRepoText({ client_brief: brief = "", hourly_rate: rate = "" }) {
     "",
     "1. Read the README, open issues and TODOs. List the deliverables that are still to be built, one line each, in client language.",
     `2. Call calculate_sow_pricing with that list as client_message${String(rate).trim() ? ` and hourly_rate ${String(rate).trim()}` : ""}. Show me the line items, the buffer and the total, plus the preview link.`,
-    "3. Ask whether I want to adjust anything. Creating the proposal uses one from my TempoRevenue allowance.",
+    "3. Ask whether I want to adjust anything. Creating the draft counts toward my TempoRevenue draft limit.",
     "4. On my confirmation, call create_proposal with a short brief (deliverables, timeline, the total as the stated price). Give me the editor link. Nothing is sent to the client until I send it.",
   ].join("\n");
 }

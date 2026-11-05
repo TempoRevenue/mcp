@@ -14,11 +14,12 @@ export const TOOLS = [
     name: "create_proposal",
     title: "Create proposal",
     description:
-      "Create a draft proposal in the user's TempoRevenue account from a short description of the client's request: " +
-      "client name, scope, timeline and budget. " +
-      "If the request states a price, it is used as the total; otherwise the price is calculated from the user's own rates. " +
-      "Returns a link to review and send. " +
-      "Uses one proposal from the user's allowance.",
+      "Draft a project proposal when a freelancer wants to quote a client request or prepare a scope of work. " +
+      "Send a short brief with client, scope, timeline, and budget, not the full chat history. " +
+      "An explicit price is used as the total; otherwise code calculates estimated hours times the user's rate. " +
+      "Returns an editor link for review. Does not publish, send, collect payment, or create change orders. " +
+      "Every account includes one free personal draft. Further AI drafts use generation limits, not publication credits. " +
+      "Publishing an approval link uses one credit in the web app. Optional Pro includes zero publication credits.",
     inputSchema: {
       type: "object",
       properties: {
@@ -45,7 +46,7 @@ export const TOOLS = [
     description:
       "Check the status of a proposal in the user's TempoRevenue account: draft, viewed or accepted, " +
       "with the date the client first opened it and the date they accepted it. " +
-      "Use the `id` returned by create_proposal or list_proposals.",
+      "Accepted means client approval, not payment. Use the `id` returned by create_proposal or list_proposals.",
     inputSchema: {
       type: "object",
       properties: { id: { type: "string", description: "Proposal id returned by create_proposal or list_proposals." } },
@@ -73,7 +74,7 @@ export const TOOLS = [
   {
     name: "get_credit_balance",
     title: "Get credit balance",
-    description: "Return how many proposals the user can still create in TempoRevenue.",
+    description: "Return remaining publication credits for the account. This balance does not measure AI draft generation limits or Pro access.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },

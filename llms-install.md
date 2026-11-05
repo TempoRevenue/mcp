@@ -8,10 +8,10 @@ A stdio MCP server, published on npm as `@temporevenue/mcp`. It needs Node.js 18
 
 Tools:
 
-- `create_proposal`: create a draft proposal from a short description of the client's request (client, scope, timeline, budget). Returns a link to review and send. Uses one proposal from the user's allowance.
+- `create_proposal`: create a draft proposal from a short description of the client's request (client, scope, timeline, budget). Returns an editor link for review; it does not publish, send or collect payment. Counts toward the user's draft limit; publishing for client approval uses one credit in the web app.
 - `get_proposal_status`: draft, viewed or accepted, with dates.
 - `list_proposals`: the user's most recent proposals, optionally filtered by status.
-- `get_credit_balance`: how many proposals the user can still create.
+- `get_credit_balance`: the user's remaining publication credits.
 
 ## Steps
 
@@ -41,6 +41,6 @@ Tools:
 
 ## Notes
 
-- Do not auto-approve `create_proposal`: it uses the user's allowance. The read tools are safe to auto-approve if the user wants.
+- Do not auto-approve `create_proposal`: it counts toward the user's draft limit. The read tools are safe to auto-approve if the user wants.
 - No telemetry and nothing written to disk. Source: https://github.com/TempoRevenue/mcp
 - A 401 error means the key is wrong or revoked: create a new one on the Integrations page.

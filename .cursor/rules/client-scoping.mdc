@@ -14,7 +14,7 @@ When the user pastes a client message, call notes or a project brief and asks to
    - timeline or deadline
    - budget, only if the client or the user stated one
    - anything explicitly out of scope
-2. Show the brief and ask for confirmation. Creating a proposal uses one from the user's TempoRevenue allowance.
+2. Show the brief and ask for confirmation. Creating the draft counts toward the user's TempoRevenue draft limit; it does not use a publication credit.
 3. Call the `create_proposal` tool of the `temporevenue` MCP server with `deal_description` set to the brief and `client_name` if known.
 4. Return the editor link. Nothing is sent to the client until the user sends it.
 

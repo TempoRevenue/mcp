@@ -26,13 +26,13 @@ Demo mode runs locally. It exposes the same four tools as the live server and an
 | `create_proposal` | Creates a draft proposal from a short description of the client's request. A price stated in the request is used as the total; otherwise it is your rate times the estimated hours, calculated in code. Returns a link to review and send. |
 | `get_proposal_status` | Draft, viewed or accepted, with the dates the client opened and accepted it. |
 | `list_proposals` | Your most recent proposals, optionally filtered by status. |
-| `get_credit_balance` | How many proposals you can still create. |
+| `get_credit_balance` | Your remaining publication credits. |
 
 Nothing is sent to a client until you send it yourself.
 
 ## Install
 
-1. Create a free account at [app.temporevenue.com](https://app.temporevenue.com/en/login?utm_source=github&utm_medium=readme) (3 proposals a month, no card).
+1. Create a free account at [app.temporevenue.com](https://app.temporevenue.com/en/login?utm_source=github&utm_medium=readme) (your first draft is free, no card). Publishing for client approval uses credits, from $29 for 3.
 2. Create an API key on the [Integrations page](https://app.temporevenue.com/en/integrations).
 3. Add the server to your client.
 
