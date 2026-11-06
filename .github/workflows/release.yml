@@ -11,6 +11,14 @@ name: Release
 on:
   push:
     tags: ["v*"]
+  # Manual run from main (Actions > Release > Run workflow), for when a tag cannot be pushed from where you are.
+  # The GitHub release step creates the tag on the commit that was tested and published.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, without the v (must match the manifests on main), e.g. 1.2.1"
+        required: true
+        type: string
 
 permissions:
   contents: write # GitHub release
@@ -25,6 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MCP_PUBLISHER_VERSION: v1.8.1
+      TAG: ${{ github.event_name == 'workflow_dispatch' && format('v{0}', inputs.version) || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
 
@@ -33,9 +42,21 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
 
+      - name: Manual run guard
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$GITHUB_REF_NAME" != "main" ]; then
+            echo "::error::Run the manual release from main."; exit 1
+          fi
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" >/dev/null 2>&1; then
+            echo "::error::Tag $TAG already exists; push the tag or create the release in the UI instead."; exit 1
+          fi
+
       - name: Version from tag
         id: version
-        run: echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+        run: echo "value=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       - name: Check manifests match the tag
         run: node scripts/version.mjs --check "${{ steps.version.outputs.value }}"
@@ -85,8 +106,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         # A release created in the GitHub UI already exists (it is what pushed the tag): keep it.
         run: |
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            echo "Release $GITHUB_REF_NAME already exists; keeping it."
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; keeping it."
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            gh release create "$TAG" --generate-notes --target "$GITHUB_SHA"
           else
-            gh release create "$GITHUB_REF_NAME" --generate-notes --verify-tag
+            gh release create "$TAG" --generate-notes --verify-tag
           fi
