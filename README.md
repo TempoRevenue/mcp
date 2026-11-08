@@ -3,6 +3,7 @@
 [![npm](https://img.shields.io/npm/v/@temporevenue/mcp)](https://www.npmjs.com/package/@temporevenue/mcp)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-stdio%20%7C%20Streamable%20HTTP-black)](https://modelcontextprotocol.io)
+[![mcptry](https://mcptry.com/badge/com.temporevenue/proposals)](https://mcptry.com/servers/com.temporevenue/proposals)
 
 Turn a client conversation into a priced proposal draft without leaving Claude, Cursor, Gemini CLI or any MCP client. The draft lands in your [TempoRevenue](https://temporevenue.com) account with a link to review it, then send it for online acceptance.
 
