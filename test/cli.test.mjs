@@ -31,14 +31,21 @@ test("demo server answers initialize, tools/list and tools/call", () => {
   const init = handleDemoMessage({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18" } });
   assert.equal(init.result.protocolVersion, "2025-06-18");
   const list = handleDemoMessage({ jsonrpc: "2.0", id: 2, method: "tools/list" });
-  assert.deepEqual(list.result.tools.map((t) => t.name), ["create_proposal", "get_proposal_status", "list_proposals", "get_credit_balance"]);
+  assert.deepEqual(list.result.tools.map((t) => t.name), ["create_contract", "create_change_order", "get_contract_status", "list_contracts", "get_credit_balance"]);
   const call = handleDemoMessage({
     jsonrpc: "2.0",
     id: 3,
     method: "tools/call",
-    params: { name: "create_proposal", arguments: { deal_description: SCENARIOS[0].text } },
+    params: { name: "create_contract", arguments: { deal_description: SCENARIOS[0].text, contract_type: "statement_of_work" } },
   });
   assert.match(call.result.content[0].text, /Fixed price: \$/);
+  assert.match(call.result.content[0].text, /No contract was created/);
+  // v1.3.0: the old names still answer in tools/call.
+  const legacy = handleDemoMessage({ jsonrpc: "2.0", id: 5, method: "tools/call", params: { name: "create_proposal", arguments: { deal_description: SCENARIOS[0].text } } });
+  assert.match(legacy.result.content[0].text, /Fixed price: \$/);
+  assert.ok(handleDemoMessage({ jsonrpc: "2.0", id: 6, method: "tools/call", params: { name: "list_proposals", arguments: {} } }).result.content[0].text.includes("contracts"));
+  const co = handleDemoMessage({ jsonrpc: "2.0", id: 7, method: "tools/call", params: { name: "create_change_order", arguments: { prior_agreement: "Site", requested_change: "Add a blog", timeline_impact: "1 week" } } });
+  assert.match(co.result.content[0].text, /Change order \(demo\): Add a blog/);
   assert.equal(handleDemoMessage({ jsonrpc: "2.0", method: "notifications/initialized" }), null);
   assert.equal(handleDemoMessage({ jsonrpc: "2.0", id: 4, method: "nope" }).error.code, -32601);
 });
@@ -72,7 +79,7 @@ test("CLI in demo mode speaks MCP over stdio", async () => {
   await new Promise((resolve) => child.on("close", resolve));
   const replies = out.trim().split("\n").map((line) => JSON.parse(line));
   assert.equal(replies.length, 2);
-  assert.deepEqual(replies.find((r) => r.id === 2).result.tools.map((t) => t.name), ["calculate_sow_pricing", "create_proposal", "get_proposal_status", "list_proposals", "get_credit_balance"]);
+  assert.deepEqual(replies.find((r) => r.id === 2).result.tools.map((t) => t.name), ["calculate_sow_pricing", "create_contract", "create_change_order", "get_contract_status", "list_contracts", "get_credit_balance"]);
 });
 
 test("version script checks every manifest", async () => {
@@ -97,10 +104,13 @@ test("prompts are served locally and advertised in initialize", async () => {
   await new Promise((resolve) => child.on("close", resolve));
   const replies = Object.fromEntries(out.trim().split("\n").map((l) => JSON.parse(l)).map((r) => [r.id, r]));
   assert.ok(replies[1].result.capabilities.prompts);
-  assert.deepEqual(replies[2].result.prompts.map((p) => p.name), ["quote-client-message", "scope-repo-to-proposal", "check-pending-proposals"]);
+  assert.deepEqual(replies[2].result.prompts.map((p) => p.name), ["quote-client-message", "scope-repo-to-contract", "check-pending-contracts"]);
   assert.match(replies[3].result.messages[0].content.text, /Need a Shopify store/);
   assert.match(replies[3].result.messages[0].content.text, /Client: Ana/);
   assert.equal(replies[4].error.code, -32602);
+  const { getPrompt } = await import("../src/prompts.mjs");
+  assert.ok(getPrompt("check-pending-proposals").messages[0].content.text.includes("list_contracts"));
+  assert.ok(getPrompt("scope-repo-to-proposal").messages[0].content.text.includes("create_contract"));
 });
 
 test("calculate_sow_pricing, resources and live-mode merging", async () => {

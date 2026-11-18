@@ -8,10 +8,11 @@ A stdio MCP server, published on npm as `@temporevenue/mcp`. It needs Node.js 18
 
 Tools:
 
-- `create_proposal`: create a draft proposal from a short description of the client's request (client, scope, timeline, budget). Returns an editor link for review; it does not publish, send or collect payment. Counts toward the user's draft limit; publishing for client approval uses one credit in the web app.
-- `get_proposal_status`: draft, viewed or accepted, with dates.
-- `list_proposals`: the user's most recent proposals, optionally filtered by status.
-- `get_credit_balance`: the user's remaining publication credits.
+- `create_contract`: create a contract draft (service agreement, statement of work or master services agreement) from a short description of the client's request (client, scope, timeline, budget). Returns an editor link for review; it does not publish, send or collect payment. Counts toward the user's draft limit; publishing for signature uses one credit in the web app.
+- `create_change_order`: create a change order draft for extra work on an agreed contract.
+- `get_contract_status`: draft, viewed or accepted (signed), with dates.
+- `list_contracts`: the user's most recent contracts, optionally filtered by status.
+- `get_credit_balance`: the user's remaining credits.
 
 ## Steps
 
@@ -37,10 +38,10 @@ Tools:
 }
 ```
 
-3. Verify: list the tools. You should see the 4 tools above. With a key, call `get_credit_balance`; it returns `credits_remaining`.
+3. Verify: list the tools. You should see the 5 tools above. With a key, call `get_credit_balance`; it returns `credits_remaining`.
 
 ## Notes
 
-- Do not auto-approve `create_proposal`: it counts toward the user's draft limit. The read tools are safe to auto-approve if the user wants.
+- Do not auto-approve `create_contract` or `create_change_order`: they count toward the user's draft limit. The read tools are safe to auto-approve if the user wants.
 - No telemetry and nothing written to disk. Source: https://github.com/TempoRevenue/mcp
 - A 401 error means the key is wrong or revoked: create a new one on the Integrations page.

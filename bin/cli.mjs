@@ -18,7 +18,7 @@ const positional = args.filter((arg) => !arg.startsWith("--")).join(" ").trim();
 
 const HELP = `TempoRevenue MCP server ${pkg.version}
 
-Turn a client conversation into a priced proposal draft from any MCP client.
+Turn a client conversation into a contract draft from any MCP client.
 
 Usage
   npx -y @temporevenue/mcp              Live mode (needs TEMPOREVENUE_API_KEY)
@@ -58,7 +58,7 @@ if (demo && (process.stdin.isTTY || positional)) {
       `${estimate.signals.length ? `Signals: ${estimate.signals.join("; ")}\n\n` : ""}` +
       `Try your own text:   npx -y @temporevenue/mcp --demo "paste the client message"\n` +
       `Try it in the browser: ${WEB_DEMO_URL}\n` +
-      `Create real proposals: ${SIGNUP_URL}\n` +
+      `Create real contracts: ${SIGNUP_URL}\n` +
       `Then add an API key:   ${API_KEY_URL}\n\n`
   );
   process.exit(0);

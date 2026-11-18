@@ -1,12 +1,12 @@
 ---
-description: Turn a client request into a scoped, priced proposal draft with the TempoRevenue MCP server
+description: Turn a client request into a scoped, priced contract draft with the TempoRevenue MCP server
 globs:
 alwaysApply: false
 ---
 
 # Client scoping
 
-When the user pastes a client message, call notes or a project brief and asks to quote, price, estimate or write a proposal or statement of work:
+When the user pastes a client message, call notes or a project brief and asks to quote, price, estimate or write a contract, proposal or statement of work:
 
 1. Write a short brief, not the full chat:
    - client name, if known
@@ -14,11 +14,11 @@ When the user pastes a client message, call notes or a project brief and asks to
    - timeline or deadline
    - budget, only if the client or the user stated one
    - anything explicitly out of scope
-2. Show the brief and ask for confirmation. Creating the draft counts toward the user's TempoRevenue draft limit; it does not use a publication credit.
-3. Call the `create_proposal` tool of the `temporevenue` MCP server with `deal_description` set to the brief and `client_name` if known.
-4. Return the editor link. Nothing is sent to the client until the user sends it.
+2. Show the brief and ask for confirmation. Creating the draft counts toward the user's TempoRevenue draft limit; it does not use a credit.
+3. Call the `create_contract` tool of the `temporevenue` MCP server with `deal_description` set to the brief and `client_name` if known. Set `contract_type` only when it is clear: `statement_of_work` for a project under an existing master agreement, `master_services_agreement` for ongoing work (default `service_agreement`). For extra work on an agreed contract, use `create_change_order`.
+4. Return the editor link. Nothing reaches the client until the user publishes it.
 
 Never invent a price: without one, TempoRevenue calculates it from the user's rate and the estimated hours.
-To follow up later, use `list_proposals` (status `viewed` shows opened, unaccepted proposals) and `get_proposal_status`.
+To follow up later, use `list_contracts` (status `viewed` shows opened, unsigned contracts) and `get_contract_status`.
 
 Setup: https://github.com/TempoRevenue/mcp#install

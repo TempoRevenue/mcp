@@ -5,7 +5,7 @@
 [![MCP](https://img.shields.io/badge/MCP-stdio%20%7C%20Streamable%20HTTP-black)](https://modelcontextprotocol.io)
 [![mcptry](https://mcptry.com/badge/com.temporevenue/proposals)](https://mcptry.com/servers/com.temporevenue/proposals)
 
-Turn a client conversation into a priced proposal draft without leaving Claude, Cursor, Gemini CLI or any MCP client. The draft lands in your [TempoRevenue](https://temporevenue.com) account with a link to review it, then send it for online acceptance.
+Turn a client conversation into a contract draft without leaving Claude, Cursor, Gemini CLI or any MCP client: service agreement, statement of work, master services agreement or change order. The draft lands in your [TempoRevenue](https://temporevenue.com) account with a link to review it, then publish it for your client to sign online.
 
 ## Try it without an account
 
@@ -17,23 +17,24 @@ npx -y @temporevenue/mcp --demo
 npx -y @temporevenue/mcp --demo "We need a Shopify redesign, Stripe checkout and QuickBooks sync"
 ```
 
-Demo mode runs locally. It exposes the same four tools as the live server and answers `create_proposal` with a rule-based estimate: deliverables, hours, a scope risk buffer and a fixed price. Nothing is created and nothing leaves your machine. There is also a [browser version](https://temporevenue.com/resources/chat-to-sow-generator/).
+Demo mode runs locally. It exposes the same five tools as the live server and answers `create_contract` with a rule-based estimate: deliverables, hours, a scope risk buffer and a fixed price. Nothing is created and nothing leaves your machine. There is also a [browser version](https://temporevenue.com/resources/chat-to-sow-generator/).
 
 ## Tools
 
 | Tool | What it does |
 | --- | --- |
 | `calculate_sow_pricing` | Itemized estimate from a client message: deliverables, hours, a 15/20/25% buffer and a fixed price, plus a link that opens it in the web calculator. Runs locally in this package, read-only, no account needed. |
-| `create_proposal` | Creates a draft proposal from a short description of the client's request. A price stated in the request is used as the total; otherwise it is your rate times the estimated hours, calculated in code. Returns a link to review and send. |
-| `get_proposal_status` | Draft, viewed or accepted, with the dates the client opened and accepted it. |
-| `list_proposals` | Your most recent proposals, optionally filtered by status. |
-| `get_credit_balance` | Your remaining publication credits. |
+| `create_contract` | Creates a contract draft from a short description of the client's request. `contract_type`: `service_agreement` (default), `statement_of_work` or `master_services_agreement`. A price stated in the request is used as the total; otherwise it is your rate times the estimated hours, calculated in code. Returns a link to review and publish. |
+| `create_change_order` | Creates a change order draft for extra work on an agreed contract: what changed, the added price and the timeline impact. |
+| `get_contract_status` | Draft, viewed or accepted (signed), with the dates the client opened and signed it. |
+| `list_contracts` | Your most recent contracts, optionally filtered by status. |
+| `get_credit_balance` | Your remaining credits. |
 
-Nothing is sent to a client until you send it yourself.
+Nothing reaches a client until you publish it yourself. The old tool names (`create_proposal`, `get_proposal_status`, `list_proposals`) still work.
 
 ## Install
 
-1. Create a free account at [app.temporevenue.com](https://app.temporevenue.com/en/login?utm_source=github&utm_medium=readme) (your first draft is free, no card). Publishing for client approval uses credits, from $29 for 3.
+1. Create a free account at [app.temporevenue.com](https://app.temporevenue.com/en/login?utm_source=github&utm_medium=readme) (your first draft is free, no card). Publishing a contract for signature uses credits, from $29 for 3.
 2. Create an API key on the [Integrations page](https://app.temporevenue.com/en/integrations).
 3. Add the server to your client.
 
@@ -45,7 +46,7 @@ claude mcp add temporevenue -e TEMPOREVENUE_API_KEY=your_api_key -- npx -y @temp
 
 ### Claude Code plugin
 
-Adds the server plus a `/quote` command and a skill that turns the conversation into a proposal brief:
+Adds the server plus a `/quote` command and a skill that turns the conversation into a contract brief:
 
 ```bash
 claude plugin marketplace add TempoRevenue/mcp
@@ -102,8 +103,8 @@ On claude.ai and ChatGPT, add TempoRevenue as a connector and sign in with OAuth
 Besides the tools, the package serves MCP prompts and resources locally (in demo and live mode, no account):
 
 - `quote-client-message`: turns a client message into a brief and creates the draft after you confirm.
-- `check-pending-proposals`: lists proposals the client opened but has not accepted, so you know who to follow up.
-- `scope-repo-to-proposal`: reads the current project, lists the remaining deliverables, prices them with `calculate_sow_pricing` and drafts the proposal after you confirm.
+- `check-pending-contracts`: lists contracts the client opened but has not signed, so you know who to follow up.
+- `scope-repo-to-contract`: reads the current project, lists the remaining deliverables, prices them with `calculate_sow_pricing` and drafts the contract after you confirm.
 - Resource `temporevenue://reference/estimator-defaults` (JSON): base hours per deliverable and the pricing formula.
 - Resource `temporevenue://templates/sow-clauses` (Markdown): scope, change request, revision, payment and ownership clauses.
 
@@ -111,7 +112,7 @@ Besides the tools, the package serves MCP prompts and resources locally (in demo
 
 - [benchmarks/](benchmarks/): hours by deliverable as CSV and Markdown (TempoRevenue defaults, not market averages), each row linked to the calculator.
 - [templates/](templates/): five free statement of work templates (web app MVP, website redesign, API integration, e-commerce build, monthly retainer).
-- [.cursor/rules/client-scoping.mdc](.cursor/rules/client-scoping.mdc): a Cursor rule that turns a pasted client request into a brief and calls `create_proposal`.
+- [.cursor/rules/client-scoping.mdc](.cursor/rules/client-scoping.mdc): a Cursor rule that turns a pasted client request into a brief and calls `create_contract`.
 
 ## How it works
 
@@ -122,7 +123,7 @@ MCP client ──stdio──▶ @temporevenue/mcp ──HTTPS (Bearer key)──
 - **Stateless proxy.** Each JSON-RPC message from stdin is POSTed to the TempoRevenue endpoint and the reply is written to stdout. The package keeps no state, writes nothing to disk and has no dependencies.
 - **No telemetry.** The only network peer is the endpoint above (override with `TEMPOREVENUE_MCP_URL`).
 - **Deterministic pricing.** On the server, the model extracts the scope; the price is computed in code from your rates and the hours, never by the model.
-- **Your data.** What `create_proposal` sends is stored in your TempoRevenue account as the proposal draft, under the [Privacy Policy](https://app.temporevenue.com/privacidade). This package stores nothing locally.
+- **Your data.** What `create_contract` sends is stored in your TempoRevenue account as the contract draft, under the [Privacy Policy](https://app.temporevenue.com/privacidade). This package stores nothing locally.
 
 ## Environment
 

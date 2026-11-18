@@ -1,10 +1,10 @@
 // Demo mode: a local MCP server with the same tool catalog as the live one.
 // Nothing leaves the machine and nothing is created in any account.
-// create_proposal returns a deterministic estimate (src/estimate.mjs) so you
+// create_contract returns a deterministic estimate (src/estimate.mjs) so you
 // can see the shape of the workflow before signing up.
 
 import { estimateScope, formatBrief } from "./estimate.mjs";
-import { SERVER_INFO, TOOLS } from "./tools.mjs";
+import { LEGACY_TOOL_ALIASES, SERVER_INFO, TOOLS } from "./tools.mjs";
 
 export const SIGNUP_URL = "https://app.temporevenue.com/en/login?utm_source=npm&utm_medium=cli&utm_campaign=mcp-demo";
 export const API_KEY_URL = "https://app.temporevenue.com/en/integrations";
@@ -13,15 +13,16 @@ export const WEB_DEMO_URL = "https://temporevenue.com/resources/chat-to-sow-gene
 const SUPPORTED_PROTOCOLS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"];
 
 const DEMO_NOTE =
-  "Demo mode: this is a rule-based estimate computed locally. No proposal was created and nothing was sent anywhere.\n" +
-  `To create real proposals with a review-and-send link, create a free account (${SIGNUP_URL}), ` +
+  "Demo mode: this is a rule-based estimate computed locally. No contract was created and nothing was sent anywhere.\n" +
+  `To create real contracts your client signs online, create a free account (${SIGNUP_URL}), ` +
   `generate an API key (${API_KEY_URL}) and set TEMPOREVENUE_API_KEY.`;
 
 const text = (value) => ({ content: [{ type: "text", text: typeof value === "string" ? value : JSON.stringify(value, null, 2) }] });
 
-function callTool(name, args = {}) {
+function callTool(rawName, args = {}) {
+  const name = LEGACY_TOOL_ALIASES[rawName] ?? rawName;
   switch (name) {
-    case "create_proposal": {
+    case "create_contract": {
       const description = typeof args.deal_description === "string" ? args.deal_description.trim() : "";
       if (!description) {
         return { isError: true, ...text({ error: { code: "invalid_request", message: "deal_description is required." } }) };
@@ -29,10 +30,17 @@ function callTool(name, args = {}) {
       const estimate = estimateScope({ text: description });
       return text(`${formatBrief({ clientName: args.client_name, text: description }, estimate)}\n\n${DEMO_NOTE}`);
     }
-    case "list_proposals":
-      return text({ proposals: [], note: DEMO_NOTE });
-    case "get_proposal_status":
-      return { isError: true, ...text({ error: { code: "not_found", message: `No proposals exist in demo mode. ${DEMO_NOTE}` } }) };
+    case "create_change_order": {
+      const change = typeof args.requested_change === "string" ? args.requested_change.trim() : "";
+      if (!change) {
+        return { isError: true, ...text({ error: { code: "invalid_request", message: "requested_change is required." } }) };
+      }
+      return text(`Change order (demo): ${change}\n\nIn your account this becomes a change order draft with the added price and the timeline impact, ready to review and publish.\n\n${DEMO_NOTE}`);
+    }
+    case "list_contracts":
+      return text({ contracts: [], note: DEMO_NOTE });
+    case "get_contract_status":
+      return { isError: true, ...text({ error: { code: "not_found", message: `No contracts exist in demo mode. ${DEMO_NOTE}` } }) };
     case "get_credit_balance":
       return text({ credits_remaining: 0, note: DEMO_NOTE });
     default:

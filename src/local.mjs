@@ -119,7 +119,7 @@ function defaultsJson() {
     complexity_multiplier: { complex: 1.25, simple: 0.85, default: 1 },
     buffer_percent_options: BUFFER_OPTIONS.map((b) => Math.round(b * 100)),
     formula: "total_hours = (discovery + build x multiplier + testing + deployment) x (1 + buffer); price = total_hours x hourly_rate",
-    next_action: "Use calculate_sow_pricing for an itemized estimate, or create_proposal (TempoRevenue account) to draft the full proposal.",
+    next_action: "Use calculate_sow_pricing for an itemized estimate, or create_contract (TempoRevenue account) to draft the full contract.",
     calculator: "https://temporevenue.com/resources/chat-to-sow-generator/",
   };
 }

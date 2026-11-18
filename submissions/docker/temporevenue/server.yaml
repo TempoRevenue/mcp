@@ -11,7 +11,7 @@ meta:
     - remote
 about:
   title: TempoRevenue
-  description: Turn a client conversation into a priced proposal draft and track whether the client opened or accepted it
+  description: Turn a client conversation into a contract draft and track whether the client opened or signed it
   icon: https://app.temporevenue.com/connector/temporevenue-connector-512.png
 remote:
   transport_type: streamable-http
