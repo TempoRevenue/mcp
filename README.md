@@ -24,10 +24,10 @@ Demo mode runs locally. It exposes the same five tools as the live server and an
 | Tool | What it does |
 | --- | --- |
 | `calculate_sow_pricing` | Itemized estimate from a client message: deliverables, hours, a 15/20/25% buffer and a fixed price, plus a link that opens it in the web calculator. Runs locally in this package, read-only, no account needed. |
-| `create_contract` | Creates a contract draft from a short description of the client's request. `contract_type`: `service_agreement` (default), `statement_of_work` or `master_services_agreement`. A price stated in the request is used as the total; otherwise it is your rate times the estimated hours, calculated in code. Returns a link to review and publish. |
+| `create_contract` | Creates a contract draft from a short description of the client's request. `contract_type`: `service_agreement` (default), `statement_of_work`, `master_services_agreement` or `proposal`; `master_agreement_id` links a statement of work to your signed MSA. A price stated in the request is used as the total; otherwise it is your rate times the estimated hours, calculated in code. Returns a link to review and publish. |
 | `create_change_order` | Creates a change order draft for extra work on an agreed contract: what changed, the added price and the timeline impact. |
 | `get_contract_status` | Draft, viewed or accepted (signed), with the dates the client opened and signed it. |
-| `list_contracts` | Your most recent contracts, optionally filtered by status. |
+| `list_contracts` | Your most recent contracts with their type, optionally filtered by status. |
 | `get_credit_balance` | Your remaining credits. |
 
 Nothing reaches a client until you publish it yourself. The old tool names (`create_proposal`, `get_proposal_status`, `list_proposals`) still work.

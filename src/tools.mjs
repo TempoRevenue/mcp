@@ -8,7 +8,7 @@
 export const SERVER_INFO = {
   name: "temporevenue",
   title: "TempoRevenue",
-  version: "1.3.0",
+  version: "1.3.1",
   websiteUrl: "https://temporevenue.com",
 };
 
@@ -23,7 +23,7 @@ export const TOOLS = [
   {
     "name": "create_contract",
     "title": "Create contract",
-    "description": "Draft a client contract (service agreement, statement of work or master services agreement) in the user's TempoRevenue account from a short brief: client, scope, timeline and budget. Use it when a freelancer, consultant or agency wants a contract, agreement, SOW, MSA, quote or proposal for client work. The model extracts the scope; code calculates the price (a stated price, or estimated hours times the user's rate, when set). Returns an editor link for review. Does not publish, send, collect payment or give legal advice. Publishing a contract for signature uses one credit in the web app.",
+    "description": "Draft a client contract (service agreement, statement of work or master services agreement) or a simpler proposal in the user's TempoRevenue account from a short brief: client, scope, timeline and budget. Use it when a freelancer, consultant or agency wants a contract, agreement, SOW, MSA, quote or proposal for client work. For a statement of work under a signed master services agreement, pass its id from list_contracts. The model extracts the scope; code calculates the price (a stated price, or estimated hours times the user's rate, when set). Returns an editor link for review. Does not publish, send, collect payment or give legal advice. Publishing a contract for signature uses one credit in the web app.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -48,13 +48,18 @@ export const TOOLS = [
           ]
         },
         "contract_type": {
-          "description": "service_agreement (default): one project. statement_of_work: one project under an existing master agreement. master_services_agreement: framework terms for ongoing work with the same client.",
+          "description": "service_agreement (default): a contract for one project. statement_of_work: one project, usually under a master services agreement. master_services_agreement: framework terms for ongoing work with the same client. proposal: a simpler priced proposal without formal contract clauses. Pick the one the user asked for.",
           "type": "string",
           "enum": [
             "service_agreement",
             "statement_of_work",
-            "master_services_agreement"
+            "master_services_agreement",
+            "proposal"
           ]
+        },
+        "master_agreement_id": {
+          "description": "Only for a statement of work: id of the user's signed master services agreement (from list_contracts) that this SOW falls under. The SOW then incorporates it and the MSA prevails. Omit for a standalone document.",
+          "type": "string"
         }
       },
       "required": [
@@ -154,7 +159,7 @@ export const TOOLS = [
   {
     "name": "list_contracts",
     "title": "List contracts",
-    "description": "List the user's most recent contracts in TempoRevenue, newest first: id, title, status (draft, viewed or accepted) and a link to open each one. Optionally filter by status. Returns at most 20.",
+    "description": "List the user's most recent contracts in TempoRevenue, newest first: id, title, type (service_agreement, statement_of_work, master_services_agreement, proposal or change_order), status (draft, viewed or accepted) and a link to open each one. Optionally filter by status. Returns at most 20. A signed master services agreement (type master_services_agreement, status accepted) can be cited by a new statement of work through create_contract.",
     "inputSchema": {
       "type": "object",
       "properties": {
